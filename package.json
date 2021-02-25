@@ -1,6 +1,6 @@
 {
   "name": "@ehynds/use-fetch",
-  "version": "1.0.0",
+  "version": "1.0.1",
   "description": "A small, low-level React hook that wraps the Fetch API",
   "main": "dist/index.js",
   "types": "dist/index.d.ts",
@@ -9,7 +9,8 @@
     "lint": "eslint .",
     "ts": "tsc --skipLibCheck --project tsconfig.json",
     "ts:watch": "npm run ts -- --watch",
-    "build": "rm -rf dist/ && npm run ts"
+    "build": "rm -rf dist/ && npm run ts",
+    "prepublish": "npm run build"
   },
   "author": "Eric Hynds (https://github.com/ehynds)",
   "homepage": "https://github.com/ehynds/use-fetch",
