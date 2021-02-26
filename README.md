@@ -16,28 +16,116 @@ $ yarn add @ehynds/use-fetch
 
 ## Usage
 
+Perform a `GET` request:
+
+```js
+const { get } = useFetch();
+
+// Optional query params
+const params = {
+  limit: 1
+};
+
+// Optional options to pass to the `fetch` request
+const options = {
+  headers: {
+    'Authorization': 'Access-Token foo'
+  }
+};
+
+get('https://my.api', params, options);
+```
+
+In addition, `abort` and the raw response (`res`) are available as well:
+
+```js
+const { abort, req } = get('https://my.api');
+
+req.then(({ json, res }) => {
+  // `json` - the response body
+  console.log('Response body:', json);
+
+  // `res`  - the raw response (read headers, blobs, etc.)
+  console.log('Response status:', res.status);
+});
+
+// abort the request
+abort();
+```
+
+`useFetch` exports an object with the following properties:
+
+```js
+const {
+  get,
+  post,
+  put,
+  del,
+  head,
+  request // Escape hatch to access `fetch` directly
+} = useFetch();
+```
+
+## Examples
+
+#### Basic `GET` request when a component mounts
+
 ```js
 import { useFetch } from '@ehynds/use-fetch';
 
-const Component = () => {
-  const { get /* or head | post | put | del | request */ } = useFetch();
+const SomeComponent = () => {
+  const { get } = useFetch();
+
+  useEffect() => {
+    const params = {
+      limit: 2
+    };
+    get('https://my.api', params)
+      .then(({ json }) => {
+        console.log('Result:', json);
+      })
+      .catch((err) => {
+        console.error('Error:', err);
+      });
+  }, []);
+};
+```
+#### Cancel a request on cleanup
+
+```js
+const SomeComponent = () => {
+  const { get } = useFetch();
 
   useEffect(() => {
-    get('http://my.api').then(({ json }) => {
+    const { abort, req } = get('https://my.api');
+
+    req.then(({ json }) => {
       console.log('Result:', json);
     });
+
+    return () => {
+      abort();
+    };
   }, []);
-
-  ...
-}
+};
 ```
+#### Request a `blob`
 
-#### More complex example
+```js
+const SomeComponent = () => {
+  const { get } = useFetch();
 
-* Perform a `GET` request with query parameters
-* Response body typings
-* Abort in-flight requests when the effect unmounts
-* Access to the raw `response` from `fetch`
+  useEffect(() => {
+    get('image.png')
+      .then(({ res }) => res.blob())
+      .then((imageBlob) => {
+        const imageUrl = URL.createObjectURL(imageBlob);
+        someImage.src = imageUrl;
+      });
+  }, []);
+};
+```
+#### With typings
 
 ```ts
 import { useFetch } from '@ehynds/use-fetch';
@@ -52,27 +140,19 @@ const BookList = () => {
   const { get } = useFetch();
 
   useEffect(() => {
-    const { abort, req } = get<Book[]>('https://my-api.com/books/list', {
+    const { req } = get<Book[]>('https://my-api.com/books/list', {
       limit: 2
     });
 
     req.then(({ res, json: books }) => {
       // `json` represents the JSON-parsed response body:
       setBooks(books);
-
-      // Access the raw response through `res`:
-      console.log('Status code:', res.status);
     });
-
-    return () => {
-      abort();
-    };
   }, []);
 
   ...
 }
 ```
-
 #### Manage state with the `useFetchState` helper
 
 ```tsx
@@ -136,7 +216,3 @@ const BookList = () => {
   );
 };
 ```
-
-## API
-
-Coming soon!
