@@ -36,17 +36,25 @@ const options = {
 get('https://my.api', params, options);
 ```
 
-In addition, `abort` and the raw response (`res`) are available as well:
+Each verb method returns an object with an `abort` function and the `req`uest:
 
 ```js
 const { abort, req } = get('https://my.api');
 
 req.then(({ json, res }) => {
-  // `json` - the response body
+  // `json` is the parsed response body.
+  // This lib assumes that you're interfacing with a
+  // JSON-based API. If that's not the case, use `res`
+  // to handle your response:
+  // - res.text()
+  // - res.blob()
   console.log('Response body:', json);
 
-  // `res`  - the raw response (read headers, blobs, etc.)
+  // `res` - the raw fetch response.
+  // See the response docs for the full API:
+  // https://developer.mozilla.org/en-US/docs/Web/API/Response
   console.log('Response status:', res.status);
+  console.log('Response headers', res.headers);
 });
 
 // abort the request
@@ -62,13 +70,13 @@ const {
   put,
   del,
   head,
-  request // Escape hatch to access `fetch` directly
+  request // Escape hatch for direect access to `fetch`
 } = useFetch();
 ```
 
 ## Examples
 
-#### Basic `GET` request when a component mounts
+#### Basic `GET` request when a component mounts:
 
 ```js
 import { useFetch } from '@ehynds/use-fetch';
@@ -80,7 +88,10 @@ const SomeComponent = () => {
     const params = {
       limit: 2
     };
-    get('https://my.api', params)
+
+    const { req } = get('https://my.api', params);
+
+    req
       .then(({ json }) => {
         console.log('Result:', json);
       })
@@ -90,7 +101,7 @@ const SomeComponent = () => {
   }, []);
 };
 ```
-#### Cancel a request on cleanup
+#### Cancel a request on cleanup:
 
 ```js
 const SomeComponent = () => {
@@ -109,7 +120,7 @@ const SomeComponent = () => {
   }, []);
 };
 ```
-#### Request a `blob`
+#### Request a `blob`:
 
 ```js
 const SomeComponent = () => {
@@ -125,7 +136,7 @@ const SomeComponent = () => {
   }, []);
 };
 ```
-#### With typings
+#### Type your responses:
 
 ```ts
 import { useFetch } from '@ehynds/use-fetch';
@@ -144,8 +155,7 @@ const BookList = () => {
       limit: 2
     });
 
-    req.then(({ res, json: books }) => {
-      // `json` represents the JSON-parsed response body:
+    req.then(({ json: books }) => {
       setBooks(books);
     });
   }, []);
@@ -153,7 +163,7 @@ const BookList = () => {
   ...
 }
 ```
-#### Manage state with the `useFetchState` helper
+#### Manage state with the `useFetchState` helper:
 
 ```tsx
 import { useFetch, useFetchState } from '@ehynds/use-fetch';
