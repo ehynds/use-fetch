@@ -1,6 +1,6 @@
 {
   "name": "@ehynds/use-fetch",
-  "version": "1.0.1",
+  "version": "1.0.2",
   "description": "A small, low-level React hook that wraps the Fetch API",
   "main": "dist/index.js",
   "types": "dist/index.d.ts",
