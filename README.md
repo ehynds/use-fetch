@@ -2,7 +2,7 @@
 
 ![build status](https://github.com/ehynds/use-fetch/workflows/Build/badge.svg)
 
-A small, fully-typed, low-level React hook that wraps the [fetch API](https://developer.mozilla.org/en-US/docs/Web/API/Fetch_API).
+A lightweight, fully-typed wrapper about the [fetch API](https://developer.mozilla.org/en-US/docs/Web/API/Fetch_API), in the form of a React hook.
 
 ## Install
 
@@ -70,7 +70,7 @@ const {
   put,
   del,
   head,
-  request // Escape hatch for direect access to `fetch`
+  request // Escape hatch for direct access to `fetch`
 } = useFetch();
 ```
 
@@ -127,7 +127,9 @@ const SomeComponent = () => {
   const { get } = useFetch();
 
   useEffect(() => {
-    get('image.png')
+    const { req } = get('image.png')
+
+    req
       .then(({ res }) => res.blob())
       .then((imageBlob) => {
         const imageUrl = URL.createObjectURL(imageBlob);
