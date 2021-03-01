@@ -18,12 +18,12 @@ type HeadMethodResponse = {
 };
 
 type UseHttp = {
-  get: <R>(url: string, params?: URLParams, options?: RequestInit) => MethodResponse<R>;
+  request: (url: RequestInfo, options?: RequestInit) => Promise<Body>;
   head: (url: string, params?: URLParams, options?: RequestInit) => HeadMethodResponse;
+  get: <R>(url: string, params?: URLParams, options?: RequestInit) => MethodResponse<R>;
   post: <R>(url: string, body?: unknown, options?: RequestInit) => MethodResponse<R>;
   put: <R>(url: string, body?: unknown, options?: RequestInit) => MethodResponse<R>;
   del: <R>(url: string, options?: RequestInit) => MethodResponse<R>;
-  request: (url: RequestInfo, options?: RequestInit) => Promise<Body>;
 };
 
 const urlWithParams = (url: string, params: URLParams = {}) => {
@@ -126,15 +126,14 @@ export const useFetch = (defaultOptions?: RequestInit): UseHttp => {
     };
 
     return {
-      get,
+      request,
       head,
+      get,
       post,
       put,
       del,
-      request,
     };
   }, [defaultOptions]);
 
   return client;
 };
-
