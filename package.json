@@ -15,6 +15,15 @@
   "author": "Eric Hynds (https://github.com/ehynds)",
   "homepage": "https://github.com/ehynds/use-fetch",
   "license": "MIT",
+  "keywords": [
+    "fetch",
+    "http",
+    "xhr",
+    "client",
+    "request",
+    "network",
+    "hook"
+  ],
   "dependencies": {},
   "devDependencies": {
     "@babel/preset-env": "^7.13.5",
