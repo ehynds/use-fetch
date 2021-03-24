@@ -2,7 +2,7 @@
 
 ![build status](https://github.com/ehynds/use-fetch/workflows/Build/badge.svg)
 
-A lightweight, fully-typed wrapper about the [fetch API](https://developer.mozilla.org/en-US/docs/Web/API/Fetch_API), in the form of a React hook.
+A lightweight, type-safe wrapper around the [fetch API](https://developer.mozilla.org/en-US/docs/Web/API/Fetch_API) in the form of a React hook.
 
 ## Install
 
@@ -33,13 +33,13 @@ const options = {
   }
 };
 
-get('https://my.api', params, options);
+const { json } = await get('/api', params, options);
 ```
 
 Each verb method returns an object with an `abort` function and the `req`uest:
 
 ```js
-const { abort, req } = get('https://my.api');
+const { abort, req } = get('/api');
 
 req.then(({ json, res }) => {
   // `json` is the parsed response body.
@@ -50,7 +50,7 @@ req.then(({ json, res }) => {
   // - res.blob()
   console.log('Response body:', json);
 
-  // `res` - the raw fetch response.
+  // `res` is the raw fetch response.
   // See the response docs for the full API:
   // https://developer.mozilla.org/en-US/docs/Web/API/Response
   console.log('Response status:', res.status);
@@ -59,6 +59,20 @@ req.then(({ json, res }) => {
 
 // abort the request
 abort();
+```
+
+The return value of an HTTP verb method is not chainable for [`async/await` compatibility](https://github.com/tc39/proposal-async-await/issues/27). If you don't care about aborting and want to chain off the promise, you can write:
+
+```js
+get('/api').req.then(({ json }) => {
+  console.log('Result:', json);
+});
+
+// or async/await, which is _not_ cancellable:
+
+const { json } = await get('/api');
+console.log('Result:', json);
+
 ```
 
 `useFetch` exports an object with the following properties:
@@ -89,15 +103,10 @@ const SomeComponent = () => {
       limit: 2
     };
 
-    const { req } = get('https://my.api', params);
-
-    req
-      .then(({ json }) => {
-        console.log('Result:', json);
-      })
-      .catch((err) => {
-        console.error('Error:', err);
-      });
+    get('/api', params)
+      .req
+      .then(({ json }) => console.log('Result:', json))
+      .catch((err) => console.error('Error:', err));
   }, []);
 };
 ```
@@ -108,7 +117,7 @@ const SomeComponent = () => {
   const { get } = useFetch();
 
   useEffect(() => {
-    const { abort, req } = get('https://my.api');
+    const { abort, req } = get('/api');
 
     req.then(({ json }) => {
       console.log('Result:', json);
@@ -127,9 +136,8 @@ const SomeComponent = () => {
   const { get } = useFetch();
 
   useEffect(() => {
-    const { req } = get('image.png')
-
-    req
+    get('image.png')
+      .req
       .then(({ res }) => res.blob())
       .then((imageBlob) => {
         const imageUrl = URL.createObjectURL(imageBlob);
@@ -138,7 +146,7 @@ const SomeComponent = () => {
   }, []);
 };
 ```
-#### Type your responses:
+#### Type your response JSON:
 
 ```ts
 import { useFetch } from '@ehynds/use-fetch';
@@ -153,19 +161,18 @@ const BookList = () => {
   const { get } = useFetch();
 
   useEffect(() => {
-    const { req } = get<Book[]>('https://my-api.com/books/list', {
-      limit: 2
-    });
-
-    req.then(({ json: books }) => {
-      setBooks(books);
-    });
+    const params = {
+      limit: 1
+    };
+    get<Book[]>('/books/list', params)
+      .req
+      .then(({ json: books }) => setBooks(books));
   }, []);
 
   ...
 }
 ```
-#### Manage state with the `useFetchState` helper:
+#### Manage loading & error states with the `useFetchState` helper:
 
 ```tsx
 import { useFetch, useFetchState } from '@ehynds/use-fetch';
